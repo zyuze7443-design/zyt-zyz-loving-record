@@ -3,129 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我们的秘密基地 💖</title>
+    <title>The Archives of Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pink-light: #fff0f3;
-            --pink-main: #ff8fa3;
-            --text-color: #5d5d5d;
+            --apple-bg: #f5f5f7;
+            --apple-text: #1d1d1f;
         }
         body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background-color: var(--pink-light);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            scroll-behavior: smooth;
+            overflow-x: hidden;
         }
-        /* 密钥登录层 */
-        #login-overlay {
+        /* 极致简约的登录层 */
+        #login-screen {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--pink-light);
+            inset: 0;
+            background: #fff;
+            z-index: 1000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 100;
+            transition: transform 1s cubic-bezier(0.86, 0, 0.07, 1);
         }
-        .login-box {
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(255,143,163,0.2);
-            text-align: center;
-        }
-        input {
-            padding: 10px;
-            border: 2px solid var(--pink-main);
-            border-radius: 10px;
-            outline: none;
-            margin: 10px 0;
-        }
-        button {
-            background: var(--pink-main);
-            color: white;
+        .pass-input {
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
+            border-bottom: 2px solid #e5e5e5;
+            outline: none;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            width: 240px;
+            transition: border-color 0.3s;
         }
-        button:hover { opacity: 0.8; }
+        .pass-input:focus { border-color: #000; }
 
-        /* 内容层 */
-        #main-content { display: none; width: 100%; max-width: 600px; padding: 20px; }
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        /* 动画渐现 */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* 苹果风格卡片 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
-        .header { text-align: center; color: var(--pink-main); }
-        .upload-section { display: flex; flex-direction: column; gap: 10px; }
-        .memory-item img { width: 100%; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <h3>💌 开启秘密岛屿</h3>
-            <input type="password" id="password" placeholder="输入我们的暗号...">
-            <br>
-            <button onclick="checkPass()">进入</button>
+    <div id="login-screen">
+        <div class="text-center">
+            <p class="text-sm tracking-widest text-gray-400 mb-8 uppercase">Verified Access Only</p>
+            <input type="password" id="pass-input" class="pass-input" placeholder="····" onkeypress="handleEnter(event)">
         </div>
     </div>
 
-    <div id="main-content">
-        <div class="header">
-            <h1>🐾 我们的恋爱日常</h1>
-            <p id="days-count"></p>
-        </div>
+    <main id="main-content" class="hidden">
+        <section class="h-screen flex flex-col justify-center items-center px-6">
+            <h1 class="text-6xl md:text-8xl font-semibold tracking-tight mb-4 reveal" id="days-display">0</h1>
+            <p class="text-xl md:text-2xl font-light text-gray-500 reveal">Days of shared heartbeat.</p>
+            <div class="mt-20 animate-bounce text-gray-300">↓</div>
+        </section>
 
-        <div class="card">
-            <h3>✨ 新增记录</h3>
-            <div class="upload-section">
-                <textarea id="note" rows="3" placeholder="写下现在的感想..."></textarea>
-                <input type="file" id="file-input" accept="image/*,video/*">
-                <button onclick="alert('由于是静态网页，保存功能需对接后端，目前仅作演示哦！')">发布到时光机</button>
+        <section class="max-w-4xl mx-auto px-6 py-20 reveal">
+            <div class="glass-card p-8">
+                <h3 class="text-2xl font-semibold mb-6">New Moment</h3>
+                <textarea id="note" class="w-full bg-transparent border-none text-xl outline-none resize-none" placeholder="此刻在想什么？" rows="2"></textarea>
+                <div class="flex justify-between items-center mt-6">
+                    <input type="file" id="image-input" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-100 file:text-black">
+                    <button onclick="saveNewMoment()" class="bg-black text-white px-8 py-3 rounded-full text-sm font-medium hover:opacity-80 transition">记录</button>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div id="timeline">
-            <div class="card memory-item">
-                <p><small>2026-04-28</small></p>
-                <p>今天是我们网站落成的日子！</p>
-                <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=400" alt="示例图">
-            </div>
-        </div>
-    </div>
+        <section id="timeline" class="max-w-4xl mx-auto px-6 pb-40">
+            </section>
+    </main>
 
     <script>
-        // 1. 设置密钥
-        const SECRET = "1314"; 
+        const SECRET = "051123071022"; // <-- 记得改这里
 
-        function checkPass() {
-            const pw = document.getElementById('password').value;
-            if(pw === SECRET) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                initPage();
-            } else {
-                alert("暗号不对哟~");
+        function handleEnter(e) {
+            if (e.key === 'Enter') checkAuth();
+        }
+
+        function checkAuth() {
+            const input = document.getElementById('pass-input').value;
+            if(input === SECRET) {
+                const screen = document.getElementById('login-screen');
+                screen.style.transform = 'translateY(-100%)';
+                document.getElementById('main-content').classList.remove('hidden');
+                initApp();
             }
         }
 
-        function initPage() {
-            // 2. 计算恋爱天数
-            const startDate = new Date('2025-01-01'); // 改成你们在一起的日期
-            const today = new Date();
-            const diff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
-            document.getElementById('days-count').innerText = `我们已经在一起 ${diff} 天了`;
+        function initApp() {
+            // 计算时间
+            const start = new Date('2025-01-01'); // <-- 改成你们的日子
+            const diff = Math.floor((new Date() - start) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-display').innerText = diff;
+
+            // 滚动观察器
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            loadMoments();
+        }
+
+        // 本地保存逻辑
+        function saveNewMoment() {
+            const text = document.getElementById('note').value;
+            const file = document.getElementById('image-input').files[0];
+            
+            if (!text && !file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const moments = JSON.parse(localStorage.getItem('moments') || '[]');
+                moments.unshift({
+                    text,
+                    image: e.target ? e.target.result : null,
+                    date: new Date().toLocaleDateString()
+                });
+                localStorage.setItem('moments', JSON.stringify(moments));
+                location.reload();
+            };
+
+            if (file) reader.readAsDataURL(file);
+            else reader.onload({ target: null });
+        }
+
+        function loadMoments() {
+            const timeline = document.getElementById('timeline');
+            const moments = JSON.parse(localStorage.getItem('moments') || '[]');
+            
+            moments.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'glass-card overflow-hidden mb-12 reveal';
+                div.innerHTML = `
+                    ${m.image ? `<img src="${m.image}" class="w-full h-auto">` : ''}
+                    <div class="p-8">
+                        <p class="text-xs text-gray-400 mb-2">${m.date}</p>
+                        <p class="text-xl leading-relaxed">${m.text}</p>
+                    </div>
+                `;
+                timeline.appendChild(div);
+            });
         }
     </script>
 </body>
