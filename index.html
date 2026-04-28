@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的秘密基地 💖</title>
+    <style>
+        :root {
+            --pink-light: #fff0f3;
+            --pink-main: #ff8fa3;
+            --text-color: #5d5d5d;
+        }
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: var(--pink-light);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* 密钥登录层 */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--pink-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .login-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(255,143,163,0.2);
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            border: 2px solid var(--pink-main);
+            border-radius: 10px;
+            outline: none;
+            margin: 10px 0;
+        }
+        button {
+            background: var(--pink-main);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { opacity: 0.8; }
+
+        /* 内容层 */
+        #main-content { display: none; width: 100%; max-width: 600px; padding: 20px; }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header { text-align: center; color: var(--pink-main); }
+        .upload-section { display: flex; flex-direction: column; gap: 10px; }
+        .memory-item img { width: 100%; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h3>💌 开启秘密岛屿</h3>
+            <input type="password" id="password" placeholder="输入我们的暗号...">
+            <br>
+            <button onclick="checkPass()">进入</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <div class="header">
+            <h1>🐾 我们的恋爱日常</h1>
+            <p id="days-count"></p>
+        </div>
+
+        <div class="card">
+            <h3>✨ 新增记录</h3>
+            <div class="upload-section">
+                <textarea id="note" rows="3" placeholder="写下现在的感想..."></textarea>
+                <input type="file" id="file-input" accept="image/*,video/*">
+                <button onclick="alert('由于是静态网页，保存功能需对接后端，目前仅作演示哦！')">发布到时光机</button>
+            </div>
+        </div>
+
+        <div id="timeline">
+            <div class="card memory-item">
+                <p><small>2026-04-28</small></p>
+                <p>今天是我们网站落成的日子！</p>
+                <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=400" alt="示例图">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 设置密钥
+        const SECRET = "1314"; 
+
+        function checkPass() {
+            const pw = document.getElementById('password').value;
+            if(pw === SECRET) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                initPage();
+            } else {
+                alert("暗号不对哟~");
+            }
+        }
+
+        function initPage() {
+            // 2. 计算恋爱天数
+            const startDate = new Date('2025-01-01'); // 改成你们在一起的日期
+            const today = new Date();
+            const diff = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+            document.getElementById('days-count').innerText = `我们已经在一起 ${diff} 天了`;
+        }
+    </script>
+</body>
+</html>
