@@ -2,70 +2,77 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Gallery - The Archives of Us</title>
+    <title>Gallery - The Archives</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #f5f5f7; font-family: 'Inter', sans-serif; }
-        .nav-blur { backdrop-filter: blur(20px); background: rgba(245, 245, 247, 0.8); }
-        .gallery-card { border-radius: 22px; overflow: hidden; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: zoom-in; }
-        .gallery-card:hover { transform: scale(1.02); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 100; cursor: zoom-out; }
+        body { background-color: #f5f5f7; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .nav-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(245, 245, 247, 0.8); }
+        .gallery-card { border-radius: 22px; overflow: hidden; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); cursor: zoom-in; opacity: 0; transform: translateY(20px); }
+        .gallery-card.show { opacity: 1; transform: translateY(0); }
+        .gallery-card:hover { transform: scale(1.02) translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; cursor: zoom-out; backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="pt-24 px-6">
+<body class="pt-32 px-6">
     <nav class="fixed top-0 left-0 right-0 h-16 nav-blur z-50 flex items-center justify-between px-8 border-b border-gray-200/50">
-        <a href="index.html" class="font-semibold text-lg">The Archives</a>
-        <div class="space-x-6 text-sm font-medium">
+        <a href="index.html" class="font-semibold text-lg tracking-tight">The Archives</a>
+        <div class="space-x-8 text-sm font-medium">
             <a href="gallery.html" class="text-blue-600">影像馆</a>
             <a href="timeline.html" class="text-gray-500 hover:text-black transition">时光轴</a>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-end mb-12">
-            <h1 class="text-4xl font-bold tracking-tight">我们的瞬间</h1>
-            <button onclick="document.getElementById('file-input').click()" class="text-sm bg-black text-white px-5 py-2 rounded-full">添加照片</button>
+        <div class="flex justify-between items-end mb-16">
+            <div>
+                <h1 class="text-5xl font-bold tracking-tight mb-2">Moments.</h1>
+                <p class="text-gray-500">记录每一个闪光的瞬间</p>
+            </div>
+            <button onclick="document.getElementById('file-input').click()" class="bg-[#1d1d1f] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-black transition shadow-lg">上传回忆</button>
             <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
         </div>
 
-        <div id="gallery-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
             </div>
     </main>
 
-    <div id="modal" class="modal flex items-center justify-center p-12" onclick="this.style.display='none'">
-        <img id="modal-img" src="" class="max-h-full max-w-full rounded-lg shadow-2xl">
+    <div id="modal" class="modal flex items-center justify-center p-6" onclick="this.style.display='none'">
+        <img id="modal-img" src="" class="max-h-full max-w-full rounded-2xl shadow-2xl transition-all">
     </div>
 
     <script>
-        // 安全拦截
         if(sessionStorage.getItem('isAuthed') !== 'true') window.location.href = 'index.html';
 
         const grid = document.getElementById('gallery-grid');
         const fileInput = document.getElementById('file-input');
 
-        // 初始化加载
         function loadPhotos() {
             const photos = JSON.parse(localStorage.getItem('us_photos') || '[]');
-            grid.innerHTML = photos.map((src, index) => `
+            grid.innerHTML = photos.map(src => `
                 <div class="gallery-card bg-white shadow-sm" onclick="preview('${src}')">
-                    <img src="${src}" class="w-full h-72 object-cover">
+                    <img src="${src}" class="w-full h-80 object-cover">
                 </div>
             `).join('');
+            
+            // 延迟触发动画
+            setTimeout(() => {
+                document.querySelectorAll('.gallery-card').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('show'), i * 100);
+                });
+            }, 100);
         }
 
-        fileInput.addEventListener('change', function(e) {
-            const files = e.target.files;
-            for(let file of files) {
+        fileInput.addEventListener('change', (e) => {
+            Array.from(e.target.files).forEach(file => {
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = (ev) => {
                     const photos = JSON.parse(localStorage.getItem('us_photos') || '[]');
-                    photos.unshift(event.target.result); // 存入 Base64
-                    // 注意：localStorage 有 5MB 限制。对接 Firebase 时此处应改为 API 上传
+                    photos.unshift(ev.target.result);
                     localStorage.setItem('us_photos', JSON.stringify(photos));
                     loadPhotos();
                 };
                 reader.readAsDataURL(file);
-            }
+            });
         });
 
         function preview(src) {
