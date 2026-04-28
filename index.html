@@ -7,158 +7,95 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --apple-bg: #f5f5f7;
-            --apple-text: #1d1d1f;
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: #f5f5f7; color: #1d1d1f; overflow: hidden; }
+        .apple-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(255, 255, 255, 0.7); }
+        .fade-up { animation: fadeUp 1s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--apple-bg);
-            color: var(--apple-text);
-            scroll-behavior: smooth;
-            overflow-x: hidden;
-        }
-        /* 极致简约的登录层 */
-        #login-screen {
-            position: fixed;
-            inset: 0;
-            background: #fff;
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: transform 1s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-        .pass-input {
-            border: none;
-            border-bottom: 2px solid #e5e5e5;
-            outline: none;
-            font-size: 2rem;
-            text-align: center;
-            letter-spacing: 0.5rem;
-            width: 240px;
-            transition: border-color 0.3s;
-        }
-        .pass-input:focus { border-color: #000; }
-
-        /* 动画渐现 */
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        /* 苹果风格卡片 */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 22px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
+        .password-dot { width: 12px; height: 12px; border-radius: 50%; background: #d2d2d7; transition: all 0.3s; }
+        .password-dot.active { background: #1d1d1f; transform: scale(1.2); }
+        .hidden-section { display: none; opacity: 0; transform: translateY(50px); transition: all 0.8s ease; }
+        .visible-section { display: flex; opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body>
+<body class="h-screen flex items-center justify-center">
 
-    <div id="login-screen">
+    <div id="auth-section" class="text-center fade-up">
+        <h1 class="text-4xl font-semibold mb-12 tracking-tight">The Archives of Us</h1>
+        <div class="flex space-x-4 justify-center mb-8" id="dots">
+            <div class="password-dot"></div><div class="password-dot"></div><div class="password-dot"></div><div class="password-dot"></div>
+        </div>
+        <input type="password" id="pass-input" autofocus class="opacity-0 absolute">
+        <p class="text-gray-400 text-sm">输入我们的专属纪念日数字</p>
+    </div>
+
+    <div id="main-content" class="hidden-section flex-col items-center">
         <div class="text-center">
-            <p class="text-sm tracking-widest text-gray-400 mb-8 uppercase">Verified Access Only</p>
-            <input type="password" id="pass-input" class="pass-input" placeholder="····" onkeypress="handleEnter(event)">
+            <h2 class="text-sm uppercase tracking-[0.2em] text-gray-500 mb-4">We have been together for</h2>
+            <div id="counter" class="text-6xl md:text-8xl font-bold tracking-tighter mb-12">0000 Days</div>
+            <div class="flex space-x-8">
+                <a href="gallery.html" class="px-8 py-3 rounded-full bg-[#1d1d1f] text-white hover:opacity-90 transition">影像馆</a>
+                <a href="timeline.html" class="px-8 py-3 rounded-full border border-[#1d1d1f] hover:bg-[#1d1d1f] hover:text-white transition">时光轴</a>
+            </div>
         </div>
     </div>
 
-    <main id="main-content" class="hidden">
-        <section class="h-screen flex flex-col justify-center items-center px-6">
-            <h1 class="text-6xl md:text-8xl font-semibold tracking-tight mb-4 reveal" id="days-display">0</h1>
-            <p class="text-xl md:text-2xl font-light text-gray-500 reveal">Days of shared heartbeat.</p>
-            <div class="mt-20 animate-bounce text-gray-300">↓</div>
-        </section>
-
-        <section class="max-w-4xl mx-auto px-6 py-20 reveal">
-            <div class="glass-card p-8">
-                <h3 class="text-2xl font-semibold mb-6">New Moment</h3>
-                <textarea id="note" class="w-full bg-transparent border-none text-xl outline-none resize-none" placeholder="此刻在想什么？" rows="2"></textarea>
-                <div class="flex justify-between items-center mt-6">
-                    <input type="file" id="image-input" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-gray-100 file:text-black">
-                    <button onclick="saveNewMoment()" class="bg-black text-white px-8 py-3 rounded-full text-sm font-medium hover:opacity-80 transition">记录</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="timeline" class="max-w-4xl mx-auto px-6 pb-40">
-            </section>
-    </main>
-
     <script>
-        const SECRET = "051123071022"; // <-- 记得改这里
+        // 配置区
+        const CORRECT_KEY = "2023"; // 设置你的密钥
+        const START_DATE = "2023-01-01T00:00:00"; // 设置在一起的日期
+        
+        const input = document.getElementById('pass-input');
+        const dots = document.querySelectorAll('.password-dot');
+        const authSection = document.getElementById('auth-section');
+        const mainContent = document.getElementById('main-content');
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') checkAuth();
-        }
-
-        function checkAuth() {
-            const input = document.getElementById('pass-input').value;
-            if(input === SECRET) {
-                const screen = document.getElementById('login-screen');
-                screen.style.transform = 'translateY(-100%)';
-                document.getElementById('main-content').classList.remove('hidden');
-                initApp();
-            }
-        }
-
-        function initApp() {
-            // 计算时间
-            const start = new Date('2025-01-01'); // <-- 改成你们的日子
-            const diff = Math.floor((new Date() - start) / (1000 * 60 * 60 * 24));
-            document.getElementById('days-display').innerText = diff;
-
-            // 滚动观察器
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) entry.target.classList.add('visible');
-                });
-            }, { threshold: 0.1 });
-
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-            loadMoments();
-        }
-
-        // 本地保存逻辑
-        function saveNewMoment() {
-            const text = document.getElementById('note').value;
-            const file = document.getElementById('image-input').files[0];
-            
-            if (!text && !file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const moments = JSON.parse(localStorage.getItem('moments') || '[]');
-                moments.unshift({
-                    text,
-                    image: e.target ? e.target.result : null,
-                    date: new Date().toLocaleDateString()
-                });
-                localStorage.setItem('moments', JSON.stringify(moments));
-                location.reload();
-            };
-
-            if (file) reader.readAsDataURL(file);
-            else reader.onload({ target: null });
-        }
-
-        function loadMoments() {
-            const timeline = document.getElementById('timeline');
-            const moments = JSON.parse(localStorage.getItem('moments') || '[]');
-            
-            moments.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'glass-card overflow-hidden mb-12 reveal';
-                div.innerHTML = `
-                    ${m.image ? `<img src="${m.image}" class="w-full h-auto">` : ''}
-                    <div class="p-8">
-                        <p class="text-xs text-gray-400 mb-2">${m.date}</p>
-                        <p class="text-xl leading-relaxed">${m.text}</p>
-                    </div>
-                `;
-                timeline.appendChild(div);
+        input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            dots.forEach((dot, i) => {
+                i < val.length ? dot.classList.add('active') : dot.classList.remove('active');
             });
+
+            if (val.length === 4) {
+                if (val === CORRECT_KEY) {
+                    sessionStorage.setItem('isAuthed', 'true');
+                    unlock();
+                } else {
+                    e.target.value = '';
+                    dots.forEach(dot => dot.classList.remove('active'));
+                    // 抖动反馈
+                    authSection.classList.add('animate-bounce');
+                    setTimeout(() => authSection.classList.remove('animate-bounce'), 500);
+                }
+            }
+        });
+
+        function unlock() {
+            authSection.style.transition = 'all 0.8s ease';
+            authSection.style.opacity = '0';
+            authSection.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                authSection.style.display = 'none';
+                mainContent.classList.add('visible-section');
+                startCounter();
+            }, 800);
+        }
+
+        function startCounter() {
+            const update = () => {
+                const now = new Date();
+                const start = new Date(START_DATE);
+                const diff = now - start;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / 1000 / 60) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+                document.getElementById('counter').innerText = `${days}D ${hours}H ${mins}M ${secs}S`;
+            };
+            setInterval(update, 1000);
+            update();
         }
     </script>
 </body>
